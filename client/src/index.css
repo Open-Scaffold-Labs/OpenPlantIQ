@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+@theme {
+  --color-plant-bg: #0f1f12;
+  --color-plant-card: #1a2e1d;
+  --color-plant-card2: #152618;
+  --color-plant-border: #2d4a32;
+  --color-plant-text: #e8f5e9;
+  --color-plant-muted: #81c784;
+  --color-plant-accent: #4caf50;
+  --color-plant-warm: #8d6e63;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+  background-color: rgb(15 31 18);
+  color: rgb(232 245 233);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+body {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.touch-target {
+  min-height: 48px;
+  min-width: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+input, textarea, select {
+  background-color: rgb(26 46 29);
+  color: rgb(232 245 233);
+  border-color: rgb(45 74 50);
+}
+
+input::placeholder, textarea::placeholder {
+  color: rgb(129 199 132);
+}
+
+scrollbar-width: thin;
+scrollbar-color: rgb(76 175 80) rgb(15 31 18);
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgb(15 31 18);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgb(76 175 80);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(129 199 132);
+}
