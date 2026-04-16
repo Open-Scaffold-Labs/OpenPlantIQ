@@ -27,7 +27,6 @@ app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
 // Plants routes
 const plantsRouter = express.Router();
-
 // GET /api/plants - list plants with filters
 plantsRouter.get('/', async (req, res) => {
   try {
@@ -57,8 +56,7 @@ plantsRouter.get('/', async (req, res) => {
     }
     if (region) {
       sql += ` AND region LIKE $${paramNum}`;
-      params.push(`%${region}%`);
-      paramNum++;
+      params.push(`%${region}%`);      paramNum++;
     }
     sql += ' ORDER BY common_name LIMIT 1000';
     const result = await query(sql, params);
@@ -85,7 +83,6 @@ plantsRouter.get('/stats/counts', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
 // GET /api/plants/zones/all
 plantsRouter.get('/zones/all', async (req, res) => {
   try {
@@ -113,8 +110,7 @@ plantsRouter.get('/recommendations/search', async (req, res) => {
     let sql = 'SELECT * FROM ola_plant_palette WHERE 1=1';
     const params = [];
     let paramNum = 1;
-    if (zone) { sql += ` AND hardiness_zone LIKE $${paramNum}`; params.push(`%${zone}%`); paramNum++; }
-    if (sun) { sql += ` AND sun_requirement LIKE $${paramNum}`; params.push(`%${sun}%`); paramNum++; }
+    if (zone) { sql += ` AND hardiness_zone LIKE $${paramNum}`; params.push(`%${zone}%`); paramNum++; }    if (sun) { sql += ` AND sun_requirement LIKE $${paramNum}`; params.push(`%${sun}%`); paramNum++; }
     if (water) { sql += ` AND water_needs = $${paramNum}`; params.push(water); paramNum++; }
     sql += ' ORDER BY common_name LIMIT 500';
     const result = await query(sql, params);
@@ -148,8 +144,7 @@ listsRouter.get('/', async (req, res) => {
       LEFT JOIN ola_plant_list_items li ON l.id = li.list_id
       GROUP BY l.id ORDER BY l.updated_at DESC
     `);
-    res.json(result.rows);
-  } catch (error) {
+    res.json(result.rows);  } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
@@ -159,7 +154,7 @@ listsRouter.get('/:id', async (req, res) => {
     const listResult = await query('SELECT * FROM ola_plant_lists WHERE id = $1', [req.params.id]);
     if (listResult.rows.length === 0) return res.status(404).json({ error: 'List not found' });
     const itemsResult = await query(`
-      SELECT li.*, p.botanical_name, p.common_name, p.plant_type, p.hardiness_zone, p.water_needs, p.sun_requirement
+      SELECT li.*, p.botanical_name, p.common_name, p.plant_type, p.hardiness_zone, p.water_needs, p.sun_requirement, p.image_url
       FROM ola_plant_list_items li JOIN ola_plant_palette p ON li.plant_id = p.id
       WHERE li.list_id = $1 ORDER BY li.sort_order, li.id
     `, [req.params.id]);
@@ -182,7 +177,6 @@ listsRouter.post('/', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
 listsRouter.put('/:id', async (req, res) => {
   try {
     const { name, description, project_name, client_name, zone } = req.body;
@@ -221,7 +215,6 @@ listsRouter.post('/:id/items', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
 listsRouter.put('/:listId/items/:itemId', async (req, res) => {
   try {
     const { quantity, size, spacing, notes } = req.body;
@@ -259,7 +252,6 @@ function getPdfParse() {
   if (!pdfParse) pdfParse = require('pdf-parse/lib/pdf-parse');
   return pdfParse;
 }
-
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 10 * 1024 * 1024 },
@@ -295,7 +287,6 @@ async function extractFromPDF(buffer) {
   return data.text.split(/\n/).map(l => l.trim()).filter(Boolean)
     .map(line => line.split(/\t|\|/).map(s => s.trim()).filter(Boolean));
 }
-
 function detectColumns(rows) {
   if (!rows.length) return { headerRow: -1, columns: {} };
   const headerKeywords = {
@@ -330,7 +321,6 @@ function detectColumns(rows) {
   }
   return { headerRow, columns };
 }
-
 async function matchPlants(extractedItems) {
   const { rows: allPlants } = await query('SELECT id, botanical_name, common_name, plant_type FROM ola_plant_palette');
   const results = [];
@@ -357,7 +347,6 @@ async function matchPlants(extractedItems) {
   }
   return results;
 }
-
 app.post('/api/import/parse', upload.single('file'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
@@ -398,7 +387,6 @@ app.post('/api/import/parse', upload.single('file'), async (req, res) => {
   }
 });
 
-
 // ── Migrate endpoint (creates tables + seeds) ──────────────────
 const { plants: seedPlants } = require('./seed-data');
 
@@ -432,7 +420,6 @@ app.post('/api/migrate', async (req, res) => {
       ADD COLUMN IF NOT EXISTS region TEXT,
       ADD COLUMN IF NOT EXISTS native_range TEXT
     `);
-
     // Create plant lists table
     await query(`
       CREATE TABLE IF NOT EXISTS ola_plant_lists (
@@ -470,10 +457,10 @@ app.post('/api/migrate', async (req, res) => {
     if (count < 50) {
       for (const plant of seedPlants) {
         await query(
-          `INSERT INTO ola_plant_palette (botanical_name, common_name, plant_type, hardiness_zone, water_needs, mature_height, mature_width, sun_requirement, bloom_color, season, region, native_range, description)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+          `INSERT INTO ola_plant_palette (botanical_name, common_name, plant_type, hardiness_zone, water_needs, mature_height, mature_width, sun_requirement, bloom_color, season, region, native_range, description, image_url)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
            ON CONFLICT DO NOTHING`,
-          [plant.botanical_name, plant.common_name, plant.plant_type, plant.hardiness_zone, plant.water_needs, plant.mature_height, plant.mature_width, plant.sun_requirement, plant.bloom_color, plant.season, plant.region, plant.native_range, plant.description]
+          [plant.botanical_name, plant.common_name, plant.plant_type, plant.hardiness_zone, plant.water_needs, plant.mature_height, plant.mature_width, plant.sun_requirement, plant.bloom_color, plant.season, plant.region, plant.native_range, plant.description, plant.image_url || null]
         );
       }
       const newCount = await query('SELECT COUNT(*) FROM ola_plant_palette');
@@ -491,7 +478,6 @@ app.post('/api/migrate', async (req, res) => {
     res.status(500).json({ error: error.message, stack: error.stack });
   }
 });
-
 // Also support GET for easy browser trigger
 app.get('/api/migrate', async (req, res) => {
   // Redirect to POST handler logic
@@ -503,6 +489,16 @@ app.get('/api/migrate', async (req, res) => {
       description TEXT, image_url TEXT, created_at TIMESTAMPTZ DEFAULT NOW()
     )`);
     await query(`ALTER TABLE ola_plant_palette ADD COLUMN IF NOT EXISTS region TEXT, ADD COLUMN IF NOT EXISTS native_range TEXT`);
+    await query(`ALTER TABLE ola_plant_palette ADD COLUMN IF NOT EXISTS image_url TEXT`);
+    // Update existing plants with image URLs from seed data
+    for (const plant of seedPlants) {
+      if (plant.image_url) {
+        await query(
+          `UPDATE ola_plant_palette SET image_url = $1 WHERE botanical_name = $2 AND (image_url IS NULL OR image_url = '')`,
+          [plant.image_url, plant.botanical_name]
+        );
+      }
+    }
     await query(`CREATE TABLE IF NOT EXISTS ola_plant_lists (
       id SERIAL PRIMARY KEY, name TEXT NOT NULL, description TEXT, project_name TEXT,
       client_name TEXT, zone TEXT, created_at TIMESTAMPTZ DEFAULT NOW(), updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -518,9 +514,9 @@ app.get('/api/migrate', async (req, res) => {
     if (count < 50) {
       for (const plant of seedPlants) {
         await query(
-          `INSERT INTO ola_plant_palette (botanical_name, common_name, plant_type, hardiness_zone, water_needs, mature_height, mature_width, sun_requirement, bloom_color, season, region, native_range, description)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) ON CONFLICT DO NOTHING`,
-          [plant.botanical_name, plant.common_name, plant.plant_type, plant.hardiness_zone, plant.water_needs, plant.mature_height, plant.mature_width, plant.sun_requirement, plant.bloom_color, plant.season, plant.region, plant.native_range, plant.description]
+          `INSERT INTO ola_plant_palette (botanical_name, common_name, plant_type, hardiness_zone, water_needs, mature_height, mature_width, sun_requirement, bloom_color, season, region, native_range, description, image_url)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) ON CONFLICT DO NOTHING`,
+          [plant.botanical_name, plant.common_name, plant.plant_type, plant.hardiness_zone, plant.water_needs, plant.mature_height, plant.mature_width, plant.sun_requirement, plant.bloom_color, plant.season, plant.region, plant.native_range, plant.description, plant.image_url || null]
         );
       }
       const newCount = await query('SELECT COUNT(*) FROM ola_plant_palette');

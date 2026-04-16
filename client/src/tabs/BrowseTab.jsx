@@ -32,7 +32,6 @@ function BrowseTab({ onSelectPlant, onAddToList }) {
       console.error('Error fetching stats:', error);
     }
   };
-
   const fetchPlants = async () => {
     try {
       const res = await fetch('/api/plants');
@@ -64,7 +63,6 @@ function BrowseTab({ onSelectPlant, onAddToList }) {
 
     setFilteredPlants(filtered);
   };
-
   if (selectedPlant) {
     return (
       <div className="h-full flex flex-col bg-plant-bg overflow-hidden">
@@ -79,9 +77,20 @@ function BrowseTab({ onSelectPlant, onAddToList }) {
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          {/* Plant hero image */}
+          {selectedPlant.image_url && (
+            <div className="rounded-lg overflow-hidden border border-plant-border">
+              <img
+                src={selectedPlant.image_url}
+                alt={selectedPlant.common_name}
+                className="w-full h-48 object-cover"
+                onError={(e) => { e.target.style.display = 'none'; }}
+              />
+            </div>
+          )}
+
           <div className="grid grid-cols-2 gap-3">
-            <div className="bg-plant-card2 border border-plant-border rounded p-3">
-              <p className="text-xs text-plant-muted mb-1">Type</p>
+            <div className="bg-plant-card2 border border-plant-border rounded p-3">              <p className="text-xs text-plant-muted mb-1">Type</p>
               <p className="font-semibold text-plant-text">{selectedPlant.plant_type}</p>
             </div>
             <div className="bg-plant-card2 border border-plant-border rounded p-3">
@@ -110,8 +119,7 @@ function BrowseTab({ onSelectPlant, onAddToList }) {
           )}
 
           {selectedPlant.bloom_color && (
-            <div className="bg-plant-card2 border border-plant-border rounded p-3">
-              <p className="text-xs text-plant-muted mb-1">Bloom</p>
+            <div className="bg-plant-card2 border border-plant-border rounded p-3">              <p className="text-xs text-plant-muted mb-1">Bloom</p>
               <p className="font-semibold text-plant-text">{selectedPlant.bloom_color} ({selectedPlant.season})</p>
             </div>
           )}
@@ -151,7 +159,6 @@ function BrowseTab({ onSelectPlant, onAddToList }) {
       </div>
     );
   }
-
   return (
     <div className="h-full flex flex-col bg-plant-bg overflow-hidden">
       <div className="bg-plant-card border-b border-plant-border p-4">
@@ -186,7 +193,6 @@ function BrowseTab({ onSelectPlant, onAddToList }) {
             ))}
           </div>
         </div>
-
         <div className="space-y-2">
           <p className="text-xs text-plant-muted font-semibold">Region</p>
           <div className="flex gap-2 overflow-x-auto pb-2">

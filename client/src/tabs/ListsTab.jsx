@@ -30,7 +30,6 @@ function ListsTab({ onExport, onAddPlants }) {
       console.error('Error fetching list detail:', error);
     }
   };
-
   const deleteList = async (id) => {
     if (confirm('Delete this list?')) {
       try {
@@ -65,7 +64,6 @@ function ListsTab({ onExport, onAddPlants }) {
       console.error('Error updating quantity:', error);
     }
   };
-
   if (selectedList && selectedListDetail) {
     const totalQuantity = selectedListDetail.items.reduce((sum, item) => sum + (item.quantity || 1), 0);
 
@@ -91,27 +89,39 @@ function ListsTab({ onExport, onAddPlants }) {
             <Trash2 size={20} />
           </button>
         </div>
-
         <div className="flex-1 overflow-y-auto p-4">
           {selectedListDetail.items.length === 0 ? (
             <p className="text-center text-plant-muted py-8">No plants in this list</p>
           ) : (
             <div className="space-y-3">
               {selectedListDetail.items.map((item, idx) => (
-                <div key={item.id} className="bg-plant-card2 border border-plant-border rounded p-3">
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex-1">
-                      <p className="font-semibold text-plant-text">{item.common_name}</p>
-                      <p className="text-sm text-plant-muted italic">{item.botanical_name}</p>
-                      <p className="text-xs text-plant-muted mt-1">{item.plant_type}</p>
-                    </div>
-                    <button
-                      onClick={() => removeItem(selectedListDetail.id, item.id)}
-                      className="touch-target text-red-400 hover:text-red-300"
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  </div>
+                <div key={item.id} className="bg-plant-card2 border border-plant-border rounded-lg overflow-hidden">
+                  <div className="flex">
+                    {/* Plant photo */}
+                    {item.image_url && (
+                      <div className="flex-shrink-0 w-20 h-20">
+                        <img
+                          src={item.image_url}
+                          alt={item.common_name}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                          onError={(e) => { e.target.parentElement.style.display = 'none'; }}
+                        />
+                      </div>
+                    )}
+                    <div className="flex-1 p-3">
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex-1">
+                          <p className="font-semibold text-plant-text">{item.common_name}</p>
+                          <p className="text-sm text-plant-muted italic">{item.botanical_name}</p>
+                          <p className="text-xs text-plant-muted mt-1">{item.plant_type}</p>
+                        </div>                        <button
+                          onClick={() => removeItem(selectedListDetail.id, item.id)}
+                          className="touch-target text-red-400 hover:text-red-300"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
                   <div className="grid grid-cols-2 gap-2 mt-2">
                     <div>
                       <label className="text-xs text-plant-muted block mb-1">Qty</label>
@@ -132,13 +142,14 @@ function ListsTab({ onExport, onAddPlants }) {
                         className="w-full bg-plant-bg border border-plant-border rounded px-2 py-1 text-plant-text text-sm"
                       />
                     </div>
-                  </div>
-                  {item.spacing && (
+                  </div>                  {item.spacing && (
                     <p className="text-xs text-plant-muted mt-2">Spacing: {item.spacing}</p>
                   )}
                   {item.notes && (
                     <p className="text-xs text-plant-muted mt-2">Notes: {item.notes}</p>
                   )}
+                    </div>
+                  </div>
                 </div>
               ))}
               <p className="text-sm font-semibold text-plant-accent mt-4 text-center">
@@ -156,8 +167,7 @@ function ListsTab({ onExport, onAddPlants }) {
             className="w-full touch-target bg-plant-card2 border border-plant-accent text-plant-accent hover:bg-plant-card font-semibold rounded-lg py-3 transition-colors flex items-center justify-center gap-2"
           >
             <Plus size={18} /> Add Plants
-          </button>
-          <button
+          </button>          <button
             onClick={() => {
               onExport(selectedListDetail);
             }}
