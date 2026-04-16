@@ -165,7 +165,12 @@ const multer = require('multer');
 const XLSX = require('xlsx');
 const csvParse = require('csv-parse/sync');
 const mammoth = require('mammoth');
-const pdfParse = require('pdf-parse');
+// pdf-parse crashes on Vercel at require time (loads test PDF), so lazy-load it
+let pdfParse;
+function getPdfParse() {
+  if (!pdfParse) pdfParse = require('pdf-parse/lib/pdf-parse');
+  return pdfParse;
+}
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -198,7 +203,7 @@ async function extractFromWord(buffer) {
 }
 
 async function extractFromPDF(buffer) {
-  const data = await pdfParse(buffer);
+  const data = await getPdfParse()(buffer);
   return data.text.split(/\n/).map(l => l.trim()).filter(Boolean)
     .map(line => line.split(/\t|\|/).map(s => s.trim()).filter(Boolean));
 }
