@@ -246,8 +246,12 @@ const multer = require('multer');
 const XLSX = require('xlsx');
 const csvParse = require('csv-parse/sync');
 const mammoth = require('mammoth');
-// pdf-parse v2 uses PDFParse class
-const { PDFParse } = require('pdf-parse');
+// pdf-parse v1 crashes on require (loads test PDF), so lazy-load it
+let pdfParse;
+function getPdfParse() {
+  if (!pdfParse) pdfParse = require('pdf-parse/lib/pdf-parse');
+  return pdfParse;
+}
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 10 * 1024 * 1024 },
@@ -279,8 +283,7 @@ async function extractFromWord(buffer) {
 }
 
 async function extractFromPDF(buffer) {
-  const parser = new PDFParse({ data: buffer });
-  const data = await parser.getText();
+  const data = await getPdfParse()(buffer);
   return data.text.split(/\n/).map(l => l.trim()).filter(Boolean)
     .map(line => line.split(/\t|\|/).map(s => s.trim()).filter(Boolean));
 }
